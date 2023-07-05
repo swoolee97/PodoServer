@@ -8,10 +8,10 @@ const User = require('../models/User');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json())
 
-router.get('/:userId', async (req, res) => {
-    const user_id = req.params.userId;
+router.get('/:userEmail', async (req, res) => {
+    const user_email = req.params.userEmail;
     try{
-        const user = await models.User.findOne({'user_id' : user_id})
+        const user = await models.User.findOne({'user_email' : user_email})
         if(user){
             res.json({user_email : user.user_email})
         }else{

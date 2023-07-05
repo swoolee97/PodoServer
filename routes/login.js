@@ -38,7 +38,6 @@ router.post('/', async (req, res) => {
     
     res.json({
         token,
-        user,
         login: 'success',
         user_email: body.user_email,
     })
