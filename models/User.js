@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         // required: true,
         unique: false,
-        default : '없어질거임10'
+        default : '1'
     },
     user_email: {
         type: String,

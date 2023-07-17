@@ -15,9 +15,9 @@ db.once('open', () => {
 });
 
 const User = require('./User');  // 이 부분은 당신이 사용자 모델을 어떻게 정의하였는지에 따라 달라집니다.
-// const Gifticon = require('./Gifticon');
+const Gifticon = require('./Gifticon');
 
 module.exports = {
-  User
+  User, Gifticon
   // 다른 모델들 ......
 };

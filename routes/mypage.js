@@ -1,6 +1,4 @@
 const express = require('express');
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser')
 const router = express.Router()
 var models = require('../models')

@@ -1,15 +1,20 @@
 const mongoose = require('mongoose');
 
 const GifticonSchema = new mongoose.Schema({
-    donor_id: {
+    url: {
+        type: String,
         required: true,
     },
-    receiver_id: {
+    donor_email: {
         type: String,
-        required: false,
-        default: null,
+        required: true,
     },
-    name: {
+    receiver_email: {
+        type: String,
+        default: null,
+        required :false,
+    },
+    gifticon_name: {
         type: String,
         required: true,
     },
@@ -36,4 +41,5 @@ const GifticonSchema = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Gifticon', GifticonSchema);
+const Gifticon = mongoose.model('Gifticon', GifticonSchema);
+module.exports = Gifticon

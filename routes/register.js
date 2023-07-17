@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
     }
     
     const user = models.User.findOne({user_email : body.user_email})
-    console.log(user.user_email)
+    
     if(user.user_email != undefined){
         console.log('중복')
         res.json({
