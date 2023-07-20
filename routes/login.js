@@ -10,6 +10,7 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json())
 
 router.post('/', async (req, res) => {
+    
     let body = req.body
     console.log(body)
     if (!body.user_email) {
@@ -36,7 +37,7 @@ router.post('/', async (req, res) => {
     let token = null;
     token = jwt.sign({user_email : user.user_email},'secretKey')
     
-    res.json({
+    res.status(200).json({
         token,
         login: 'success',
         user_email: body.user_email,

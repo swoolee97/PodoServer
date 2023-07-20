@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express()
-const uploadS3 = require('./middleware/uploadS3')
+
 // app.use(uploadS3)
 // /api/login' 이라는 경로로 들어오는 모든 요청을 './routes/login' 모듈에 위임한다
 // 여기서 어떤 경로로 갈 지 다 정의해 놓는다.
