@@ -3,13 +3,14 @@ const cors = require('cors');
 const passport = require('passport');
 // asdf
 const session = require('express-session');
-const morgan = require('morgan');
+// const morgan = require('morgan');
 const app = express();
 require('dotenv').config()
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-
+// app.use(require('./middleware/verifyingToken'))
 require('./passport/kakaoStrategy')()
 app.use(session({
     secret: process.env.SECRET_KEY,
