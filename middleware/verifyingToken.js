@@ -3,7 +3,7 @@ const models = require('../models')
 const RefreshToken = require('../models/RefreshToken')
 
 const verifyAccessToken = (req, res, next) => {
-    const token = req.headers['authorization'].split(' ')[1];
+    const token = req.headers['authorization'||""].split(' ')[1];
     const user_email = req.headers['user_email']
     if(user_email == 'null'){
         console.log('로그인 안했음')

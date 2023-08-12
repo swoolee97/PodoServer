@@ -45,8 +45,7 @@ router.post('/',verifyAccessToken, uploadS3.single('file'), async (req, res) => 
         }
         // s3에 성공, db에 실패했을 때
         s3.deleteObject(params, (err, data) => {
-            // if (err) console.log(err, err.stack)
-            // else console.log(data)
+
         })
         console.error(error)
         res.status(500).json({
