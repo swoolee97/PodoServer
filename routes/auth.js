@@ -10,13 +10,13 @@ const passport = require('passport');
 require('dotenv').config()
 
 router.use(express.json())
-const saveRefreshToken = async (user) => {
+const saveRefreshToken = async (userEmail) => {
     const expirationDate = new Date();
-    let refreshToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_REFRESH_KEY, {
+    let refreshToken = jwt.sign({ user_email: userEmail }, process.env.JWT_REFRESH_KEY, {
         expiresIn: '14d'
     })
     const newRefreshToken = new RefreshToken({
-        user_email: user.user_email,
+        user_email: userEmail,
         token: refreshToken,
         expiresAt: new Date().setDate(expirationDate.getDate() + 14),
     });
@@ -69,7 +69,7 @@ router.post('/login', async (req, res) => {
         })
         // refresh token db에 저장.
         try {
-            await saveRefreshToken(user)
+            await saveRefreshToken(user.user_email)
         } catch (err) {
             console.error(err)
             return res.status(500).json({ message: '로그인은 한 기기에서만', login: false })
@@ -132,7 +132,7 @@ router.post('/register', async (req, res) => {
         });
         await user.save();
 
-        saveRefreshToken(user);
+        saveRefreshToken(user.user_email);
         let accessToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_SECRET_KEY, {
             expiresIn: '1m'
         })
@@ -154,13 +154,13 @@ router.post('/kakao', async (req, res) => {
 
     // 해당 아이디로 가입이 되어 있다면
     const user = await models.User.findOne({ user_email: body.email })
-
+    let accessToken = jwt.sign({ user_email: body.email }, process.env.JWT_SECRET_KEY, {
+        expiresIn: '1m'
+    })
     if (user != null) {
         console.log('로그인 : ', user.user_email)
-        let accessToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_SECRET_KEY, {
-            expiresIn: '1m'
-        })
-        saveRefreshToken(user);
+        
+        saveRefreshToken(body.email);
         res.status(203).json({
             user_email: body.email,
             message: '카카오로그인 성공',
@@ -179,11 +179,12 @@ router.post('/kakao', async (req, res) => {
         } catch (error) {
             console.error(error)
         }
-        saveRefreshToken(user);
+        saveRefreshToken(body.email);
         res.status(202).json({
             user_email: body.email,
             message: '회원가입 성공',
             login: true,
+            accessToken: accessToken
         })
     }
 });
