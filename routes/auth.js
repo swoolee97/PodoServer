@@ -10,8 +10,8 @@ const passport = require('passport');
 require('dotenv').config()
 
 router.use(express.json())
-router.use(bodyParser.urlencoded({ extended: true }));
-router.use(bodyParser.json())
+// router.use(bodyParser.urlencoded({ extended: true }));
+// router.use(bodyParser.json())
 const saveRefreshToken = (user) => {
     const expirationDate = new Date();
     let refreshToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_REFRESH_KEY, {
@@ -38,10 +38,11 @@ router.post('/logout', async (req, res) => {
 
 // 로그인
 router.post('/login', async (req, res) => {
-    let body = req.body;
-    const userEmail = body.user_email;
-    const password = body.user_pw;
-
+    const body = req.body
+    const userEmail = req.body.user_email;
+    const password = req.body.user_pw;
+    // console.log(userEmail)
+    // console.log(password)
     if (!userEmail) {
         res.status(501).json({
             message: '아이디 안적음',
@@ -64,7 +65,7 @@ router.post('/login', async (req, res) => {
         })
         return;
     }
-    const passwordOk = await bcrypt.compare(password, user.user_password)
+    const passwordOk = bcrypt.compare(password, user.user_password)
 
     if (passwordOk) {
         let accessToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_SECRET_KEY, {

@@ -6,8 +6,11 @@ const Gifticon = require('../models/Gifticon')
 const jwt = require('jsonwebtoken')
 const router = express.Router();
 const verifyAccessToken = require('../middleware/verifyingToken')
+const GifticonFetcher = require('../middleware/GifticonFetcher')
 
-router.post('/',verifyAccessToken, uploadS3.single('file'), async (req, res) => {
+// 기부 라우터
+// 토큰 유효성 검사 => 기프티콘 정보 추출 => db에 업로드.
+router.post('/',verifyAccessToken, GifticonFetcher, uploadS3.single('file'), async (req, res) => {
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
     console.log('donor_email : ', req.body.user_email)
     if (!req.file || !req.file.location) {
