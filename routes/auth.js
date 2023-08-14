@@ -10,9 +10,7 @@ const passport = require('passport');
 require('dotenv').config()
 
 router.use(express.json())
-// router.use(bodyParser.urlencoded({ extended: true }));
-// router.use(bodyParser.json())
-const saveRefreshToken = (user) => {
+const saveRefreshToken = async (user) => {
     const expirationDate = new Date();
     let refreshToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_REFRESH_KEY, {
         expiresIn: '14d'
@@ -22,7 +20,7 @@ const saveRefreshToken = (user) => {
         token: refreshToken,
         expiresAt: new Date().setDate(expirationDate.getDate() + 14),
     });
-    newRefreshToken.save()
+    await newRefreshToken.save()
 }
 //로그아웃
 router.post('/logout', async (req, res) => {
@@ -41,8 +39,6 @@ router.post('/login', async (req, res) => {
     const body = req.body
     const userEmail = req.body.user_email;
     const password = req.body.user_pw;
-    // console.log(userEmail)
-    // console.log(password)
     if (!userEmail) {
         res.status(501).json({
             message: '아이디 안적음',
@@ -72,7 +68,12 @@ router.post('/login', async (req, res) => {
             expiresIn: '1m'
         })
         // refresh token db에 저장.
-        saveRefreshToken(user);
+        try {
+            await saveRefreshToken(user)
+        } catch (err) {
+            console.error(err)
+            return res.status(500).json({ message: '로그인은 한 기기에서만', login: false })
+        }
 
         return res.status(200).json({
             message: "로그인 성공",
@@ -136,7 +137,7 @@ router.post('/register', async (req, res) => {
             expiresIn: '1m'
         })
         res.status(200).json({
-            message : '회원가입 성공',
+            message: '회원가입 성공',
             register: true,
             user_email: user.user_email,
             accessToken: accessToken,
