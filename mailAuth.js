@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
     let toEmail = req.body.user_email
     // 인증번호 이메일 보내기
     let randomCode = req.body.randomCode;
-    console.log(randomCode)
+    
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {

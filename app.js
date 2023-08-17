@@ -26,8 +26,7 @@ app.use(passport.session());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/mypage', require('./routes/mypage'));
 app.use('/api/emailAuth', require('./mailAuth'));
-app.use('/api/uploadgifticon', require('./routes/uploadgifticon'));
-app.use('/api/searchgifticon', require('./routes/searchgifticon'));
+app.use('/api/gifticon', require('./routes/gifticon'));
 
 app.listen(3001, () => {
     console.log('listening@@commit7777')
