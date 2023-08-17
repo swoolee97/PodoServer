@@ -8,6 +8,7 @@ const User = require('./models/User');
 const nodemailer = require('nodemailer')
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json())
+require('dotenv').config()
 
 router.post('/', async (req, res) => {
 
@@ -19,7 +20,7 @@ router.post('/', async (req, res) => {
         service: 'gmail',
         auth: {
             user: 'swoolee97@gmail.com', // your Gmail account
-            pass: 'zdcradpfofjhapzn' // your Gmail password
+            pass: process.env.GMAIL_KEY // your Gmail password
         }
     });
 

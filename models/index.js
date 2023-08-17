@@ -10,8 +10,6 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
   console.log("We're connected to the database!");
-  console.log(db.name)
-  //   console.log(db)
 });
 
 const User = require('./User');  // 이 부분은 당신이 사용자 모델을 어떻게 정의하였는지에 따라 달라집니다.

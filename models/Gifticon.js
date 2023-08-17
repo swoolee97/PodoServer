@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 
 const GifticonSchema = new mongoose.Schema({
-    url: {
+    // 상품사진, 기업로고 S3 스토리지 따로 파기
+    
+    url: { // S3에 저장된 주소
         type: String,
         required: true,
     },
