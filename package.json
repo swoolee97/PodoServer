@@ -2,7 +2,6 @@
   "start": "node index.js",
   "name": "gibuserver",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -30,5 +29,7 @@
     "passport": "^0.6.0",
     "passport-kakao": "^1.0.1",
     "path": "^0.12.7"
-  }
+  },
+  "keywords": [],
+  "description": ""
 }
