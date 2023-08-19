@@ -27,6 +27,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/mypage', require('./routes/mypage'));
 app.use('/api/emailAuth', require('./mailAuth'));
 app.use('/api/gifticon', require('./routes/gifticon'));
+app.use('/api/point', require('./routes/point'));
 
 app.listen(3001, () => {
     console.log('listening@@commit7777')

@@ -1,4 +1,5 @@
 const express = require('express');
+router = express.Router();
 const bodyParser = require('body-parser');
 const app = express();
 
@@ -8,9 +9,11 @@ app.use(bodyParser.json());
 const pointData = [
     { email: 'ghcho333@ajou.ac.or', points: 500 },
     { email: 'ghcho333@ajou.ac.kr', points: 750 },
+    { email: 'swoolee97@ajou.ac.kr', points: 750 },
+    { email: 'swoolee97@gmail.com', points: 750 },
 ];
 
-app.get('/api/user/points', (req, res) => {
+router.get('/', (req, res) => {
     const userEmail = req.query.user_email;
     
     if (!userEmail) {
@@ -26,7 +29,4 @@ app.get('/api/user/points', (req, res) => {
     res.json({ points: userPoint.points });
 });
 
-const PORT = 3001;
-app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
-});
+module.exports = router;
