@@ -25,16 +25,20 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
 
     const s3 = new aws.S3()
     //db에 저장
+    const createRandomCode = () => {
+        return (String(Math.floor(Math.random() * 1000000)).padStart(6, "0"))
+    }
+    const fakeBarcodeNumber = createRandomCode();
     try {
         let today = new Date();
         const gifticon = new Gifticon({
             donor_email: req.body.user_email,
             receiver_email: null,
-            gifticon_name: '테스트',
+            gifticon_name: `영화${fakeBarcodeNumber}`,
             company: 'kakao',
             price: 1300,
             category: 'food',
-            barcode_number: '1234567812345681',
+            barcode_number: fakeBarcodeNumber,
             todate: today.toISOString().slice(0, 10),
             url: req.file.location
         })
@@ -111,10 +115,10 @@ router.get('/search', async (req, res) => {
     const page = req.query.page;
     console.log(keyword,' ' ,page)
     const limit = 10;
+    const skip = (page-1)*limit;
     try {
-        // 정규 표현식을 사용하여 keyword를 포함하는 gifticon_name을 찾습니다.
-        const regex = new RegExp(keyword, 'i');  // 'i'는 대/소문자를 구분하지 않기 위해 사용
-        const gifticons = await Gifticon.find({ gifticon_name: regex });
+        const regex = new RegExp(keyword, 'i');
+        const gifticons = await Gifticon.find({ gifticon_name: regex }).skip(skip).limit(10);
         const hasMore = gifticons.length === limit;
         if (gifticons.length === 0) {
             return res.status(404).json({ message: 'No gifticons found with the provided keyword.', hasMore : false });
