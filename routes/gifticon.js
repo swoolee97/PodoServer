@@ -74,7 +74,7 @@ router.post('/search', (req, res) => {
     }
 })
 
-router.get('/', async (req, res) => {
+router.get('/list', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     console.log(page)
     const limit = 10;
@@ -95,6 +95,37 @@ router.get('/', async (req, res) => {
         return res.status(500).json({ message: 'error', loading: hasMore })
     }
 });
+router.get('/detail', async (req, res) => {
+    const gifticonId = req.query.id
+    try {
+        const gifticon = await Gifticon.findOne({ _id: gifticonId })
+        res.status(200).json({ success: true, gifticon })
+    } catch (error) {
+        res.status(500).json({ success: false })
+        console.error(error)
+    }
+
+})
+router.get('/search', async (req, res) => {
+    const keyword = req.query.keyword;
+    const page = req.query.page;
+    console.log(keyword,' ' ,page)
+    const limit = 10;
+    try {
+        // 정규 표현식을 사용하여 keyword를 포함하는 gifticon_name을 찾습니다.
+        const regex = new RegExp(keyword, 'i');  // 'i'는 대/소문자를 구분하지 않기 위해 사용
+        const gifticons = await Gifticon.find({ gifticon_name: regex });
+        const hasMore = gifticons.length === limit;
+        if (gifticons.length === 0) {
+            return res.status(404).json({ message: 'No gifticons found with the provided keyword.', hasMore : false });
+        }
+
+        res.status(200).json({gifticons : gifticons, hasMore : hasMore});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+})
 
 
 module.exports = router;
