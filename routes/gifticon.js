@@ -25,18 +25,26 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
 
     const s3 = new aws.S3()
     //db에 저장
+
+    //가라 기프티콘 데이터 만들기
     const createRandomCode = () => {
         return (String(Math.floor(Math.random() * 1000000)).padStart(6, "0"))
     }
     const fakeBarcodeNumber = createRandomCode();
+    let gifticon_name = '';
+    if(fakeBarcodeNumber%4 == 0) {gifticon_name = '영화';}
+    else if(fakeBarcodeNumber%4 == 1) gifticon_name = '상품권'
+    else if(fakeBarcodeNumber%4 == 2) gifticon_name = '라면'
+    else if(fakeBarcodeNumber%4 == 3) gifticon_name = '투썸'
+    const price = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
     try {
         let today = new Date();
         const gifticon = new Gifticon({
             donor_email: req.body.user_email,
             receiver_email: null,
-            gifticon_name: `영화${fakeBarcodeNumber}`,
+            gifticon_name: `${gifticon_name}`,
             company: 'kakao',
-            price: 1300,
+            price: price,
             category: 'food',
             barcode_number: fakeBarcodeNumber,
             todate: today.toISOString().slice(0, 10),
