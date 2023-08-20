@@ -119,9 +119,10 @@ router.get('/search', async (req, res) => {
     try {
         const regex = new RegExp(keyword, 'i');
         const gifticons = await Gifticon.find({ gifticon_name: regex }).skip(skip).limit(10);
+        console.log(gifticons.length)
         const hasMore = gifticons.length === limit;
         if (gifticons.length === 0) {
-            return res.status(404).json({ message: 'No gifticons found with the provided keyword.', hasMore : false });
+            return res.status(404).json({gifticons : [], message: 'No gifticons found with the provided keyword.', hasMore : false });
         }
 
         res.status(200).json({gifticons : gifticons, hasMore : hasMore});
