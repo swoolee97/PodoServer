@@ -49,8 +49,9 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
             url: req.file.location
         })
         await gifticon.save();
+        const newAccessToken = req.accessToken;
         return res.status(200).json({
-            accessToken: req.accessToken,
+            accessToken: req.accessToken ?? req.body.accessToken,
             message: '기부 성공!'
         })
     } catch (error) {
