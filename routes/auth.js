@@ -26,9 +26,8 @@ const saveRefreshToken = async (userEmail) => {
 router.post('/logout', async (req, res) => {
     try {
         const user_email = req.body.user_email
-        console.log(user_email)
         await RefreshToken.deleteMany({ user_email: user_email })
-        res.status(200).json({ message: 'logout complete', success: true })
+        res.status(200).json({ message: '로그아웃 완료', success: true })
     } catch (err) {
         console.error(err)
     }
@@ -132,7 +131,7 @@ router.post('/register', async (req, res) => {
         });
         await user.save();
 
-        saveRefreshToken(user.user_email);
+        await saveRefreshToken(user.user_email);
         let accessToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_SECRET_KEY, {
             expiresIn: '1m'
         })
@@ -158,9 +157,7 @@ router.post('/kakao', async (req, res) => {
         expiresIn: '1m'
     })
     if (user != null) {
-        console.log('로그인 : ', user.user_email)
-        
-        saveRefreshToken(body.email);
+        await saveRefreshToken(body.email);
         res.status(203).json({
             user_email: body.email,
             message: '카카오로그인 성공',
@@ -169,7 +166,6 @@ router.post('/kakao', async (req, res) => {
         })
         // 가입이 안 돼 있으면
     } else {
-        console.log('회원가입 : ', body.email)
         try {
             const user = new User({
                 user_name: body.nickname,
@@ -179,7 +175,7 @@ router.post('/kakao', async (req, res) => {
         } catch (error) {
             console.error(error)
         }
-        saveRefreshToken(body.email);
+        await saveRefreshToken(body.email);
         res.status(202).json({
             user_email: body.email,
             message: '회원가입 성공',

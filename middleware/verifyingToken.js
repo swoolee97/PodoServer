@@ -5,21 +5,15 @@ const RefreshToken = require('../models/RefreshToken')
 const verifyAccessToken = (req, res, next) => {
     const token = req.headers['authorization'||""].split(' ')[1];
     const user_email = req.headers['user_email']
-    if(user_email == 'null'){
-        console.log('로그인 안했음')
-        return res.status(401).json({message : '다시 로그인 해주세요'})
-    }
+
     console.log('토큰 유효성 확인 미들웨어')
-    if (!token) {
-        return res.status(401).send({ message: '다시 로그인 해주세요'});
-    }
     // access token 유효한지 확인
     jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
         // access token이 유효하지 않다면 refresh token 유효한지 확인
         if (err) {
             console.error(err)
             console.log('유효하지 않은 access token')
-            const refreshToken = await RefreshToken.findOne({ user_email: req.headers['user_email'] })
+            const refreshToken = await RefreshToken.findOne({ user_email: user_email })
             if (refreshToken) {
                 jwt.verify(refreshToken.token, process.env.JWT_REFRESH_KEY, async (err, decoded) => {
                     // refresh token이 유효하지 않으면
