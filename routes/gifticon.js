@@ -18,8 +18,7 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
     if (!req.file || !req.file.location) {
         //file을 못받았거나 업로드에 실패했으면 실패메시지 전송
         res.status(500).json({
-            accessToken: req.accessToken,
-            message: 'S3upload failed',
+            message: '파일 오류 : 관리자에게 문의하세요',
         })
     }
 
@@ -51,9 +50,9 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
             url: req.file.location
         })
         await gifticon.save();
-        res.status(200).json({
+        return res.status(200).json({
             accessToken: req.accessToken,
-            message: 'uploaded successfully'
+            message: '기부 성공!'
         })
     } catch (error) {
         var params = {
@@ -62,12 +61,13 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
         }
         // s3에 성공, db에 실패했을 때
         s3.deleteObject(params, (err, data) => {
-
+            
         })
         console.error(error)
-        res.status(500).json({
+        // s3 저장 실패
+        return res.status(500).json({
             accessToken: req.accessToken,
-            message: 'db save failed',
+            message: '이미 등록된 기프티콘입니다',
         })
     }
 });
