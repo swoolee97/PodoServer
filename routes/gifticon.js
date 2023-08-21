@@ -14,7 +14,6 @@ const bodyParser = require('body-parser')
 // 토큰 유효성 검사 => 기프티콘 정보 추출 => db에 업로드.
 router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, res) => {
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
-    console.log('donor_email : ', req.body.user_email)
     if (!req.file || !req.file.location) {
         //file을 못받았거나 업로드에 실패했으면 실패메시지 전송
         res.status(500).json({
@@ -86,27 +85,6 @@ router.post('/search', (req, res) => {
     }
 })
 
-router.get('/list', async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    console.log(page)
-    const limit = 10;
-    const skip = (page - 1) * limit;
-    try {
-        const gifticons = await Gifticon.find()
-            .sort({ _id: -1 }) // -1은 내림차순 정렬
-            .skip(skip)
-            .limit(limit);
-        const hasMore = gifticons.length === limit;
-        if (gifticons.length === 0) {
-            return res.status(201).json({ gifticons: [], message: '기프티콘 더 없음', loading: hasMore });
-        }
-        console.log(hasMore)
-        return res.status(200).json({ gifticons: gifticons, loading: hasMore });
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({ message: 'error', loading: hasMore })
-    }
-});
 router.get('/detail', async (req, res) => {
     const gifticonId = req.query.id
     try {
@@ -118,21 +96,38 @@ router.get('/detail', async (req, res) => {
     }
 
 })
+router.get('/list', async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    try {
+        const gifticons = await Gifticon.find()
+            .sort({ _id: -1 }) // -1은 내림차순 정렬
+            .skip(skip)
+            .limit(limit);
+        const hasMore = gifticons.length === limit;
+        if (gifticons.length === 0) {
+            return res.status(201).json({ gifticons: [], message: '기프티콘 더 없음', loading: hasMore });
+        }
+        return res.status(200).json({ gifticons: gifticons, loading: hasMore });
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: 'error', loading: hasMore })
+    }
+});
 router.get('/search', async (req, res) => {
     const keyword = req.query.keyword;
     const page = req.query.page;
-    console.log(keyword,' ' ,page)
     const limit = 10;
     const skip = (page-1)*limit;
     try {
         const regex = new RegExp(keyword, 'i');
         const gifticons = await Gifticon.find({ gifticon_name: regex }).skip(skip).limit(10);
-        console.log(gifticons.length)
         const hasMore = gifticons.length === limit;
         if (gifticons.length === 0) {
-            return res.status(404).json({gifticons : [], message: 'No gifticons found with the provided keyword.', hasMore : false });
+            return res.status(404).json({gifticons : [], message: '기프티콘 더 없음', hasMore : hasMore });
         }
-
+        
         res.status(200).json({gifticons : gifticons, hasMore : hasMore});
     } catch (error) {
         console.error(error);
