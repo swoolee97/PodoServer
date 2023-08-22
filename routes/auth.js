@@ -148,6 +148,48 @@ router.post('/register', async (req, res) => {
     }
 })
 
+// 비밀번호 재설정
+router.post('/resetPassword', async (req, res) => {
+    let body = req.body
+    if (String(body.user_pw).length < 8) {
+        res.status(500).json({
+            message: '비밀번호는 8자 이상으로 생성',
+            register: false
+        })
+        return;
+    }
+    const user = await models.User.findOne({ user_email: body.user_email })
+
+    try {
+        const hashedPassword = await bcrypt.hash(body.user_pw, 10);
+
+        const user = new User({
+            user_password: hashedPassword,
+            user_name: body.user_name,
+            user_email: body.user_email,
+        });
+        await user.save();
+
+        saveRefreshToken(user.user_email);
+        let accessToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_SECRET_KEY, {
+            expiresIn: '1m'
+        })
+        res.status(200).json({
+            message: '회원가입 성공',
+            register: true,
+            user_email: user.user_email,
+            accessToken: accessToken,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred' });
+    }
+})
+
+
+
+
+
 //? /kakao로 요청오면, 카카오 로그인 페이지로 가게 되고, 카카오 서버를 통해 카카오 로그인을 하게 되면, 다음 라우터로 요청한다.
 router.post('/kakao', async (req, res) => {
     let body = req.body;
@@ -188,4 +230,14 @@ router.post('/kakao', async (req, res) => {
         })
     }
 });
+router.post('/login/reset', (req,res)=>{
+    const body = req.body;
+    console.log(body)
+    res.status(500).json({
+        message : '실패',
+        success : true
+    })
+})
+
+
 module.exports = router;

@@ -39,12 +39,12 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const hashedPassword = await bcrypt.hash(body.user_pw, 10);
+        const hashedPassword = await bcrypt.hash(body.user_pw, 10); // 비밀번호를 해쉬값으로 변환하여 암호화 한 뒤 데이터베이스에 저장
 
         const user = new User({
             user_password: hashedPassword,
             user_name: body.user_name,
-            user_email: body.user_email
+            user_email: body.user_email  // 비밀번호 재설정을 위해 이메일을 받고 패스워드를 바꾸는 방법 생각
         });
 
         // Save the user to the database
