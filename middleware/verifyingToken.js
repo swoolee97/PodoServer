@@ -5,7 +5,7 @@ const RefreshToken = require('../models/RefreshToken')
 const verifyAccessToken = (req, res, next) => {
     const token = req.headers['authorization'||""].split(' ')[1];
     const user_email = req.headers['user_email']
-
+    console.log('verifyAccessToken req.body : ', req.body)
     console.log('토큰 유효성 확인 미들웨어')
     // access token 유효한지 확인
     jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {

@@ -12,15 +12,16 @@ const bodyParser = require('body-parser')
 
 // 기부 라우터
 // 토큰 유효성 검사 => 기프티콘 정보 추출 => db에 업로드.
-router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, res) => {
+// 라우터 정의하는 순서 ? 1. 엔드포인트 2. 미들웨어 순서대로 3. 콜백함수 정의
+router.post('/upload', verifyAccessToken, uploadS3.single('files'), async (req, res) => {
+    console.log('s3업로드 미들웨어 다녀온 후 req.file 뭐가 많아야 함. location 포함해야함 : ',req.file)
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
     if (!req.file || !req.file.location) {
         //file을 못받았거나 업로드에 실패했으면 실패메시지 전송
-        res.status(500).json({
+        return res.status(500).json({
             message: '파일 오류 : 관리자에게 문의하세요',
         })
     }
-
     const s3 = new aws.S3()
     //db에 저장
 
@@ -38,7 +39,7 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
     try {
         let today = new Date();
         const gifticon = new Gifticon({
-            donor_email: req.body.user_email,
+            donor_email: req.donor_email,
             receiver_email: null,
             gifticon_name: `${gifticon_name}`,
             company: 'kakao',
@@ -75,16 +76,6 @@ router.post('/upload', verifyAccessToken, uploadS3.single('file'), async (req, r
 const upload = multer();
 router.use(bodyParser.urlencoded({ extended: true }), bodyParser.json(), upload.none());
 
-router.post('/search', (req, res) => {
-    let body = req.body;
-    try {
-        res.status(500).json({
-            keyword: body.keyword
-        })
-    } catch (error) {
-        console.error(error)
-    }
-})
 
 router.get('/detail', async (req, res) => {
     const gifticonId = req.query.id
