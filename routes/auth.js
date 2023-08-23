@@ -188,4 +188,38 @@ router.post('/kakao', async (req, res) => {
         })
     }
 });
+
+// 비밀번호 재설정
+router.post('/resetPassword', async (req, res) => {
+    const {user_email, new_password, confirm_password } = req.body;
+  
+    // 기본 유효성 검사
+    if (!new_password || !confirm_password) {
+        return res.status(400).json({ success: false, message: '새로운 비밀번호와 확인 비밀번호는 필수입니다.' });
+    }
+
+    if (new_password !== confirm_password) {
+        return res.status(400).json({ success: false, message: '새로운 비밀번호와 확인 비밀번호가 일치하지 않습니다.' });
+    }
+
+    try {
+        // 사용자 찾기
+        const user = await User.findOne({ user_email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+        }
+        
+        // 새 비밀번호 해싱
+        const hashedNewPassword = await bcrypt.hash(new_password, 10);
+
+        // 비밀번호 업데이트
+        user.user_password = hashedNewPassword;
+        await user.save();
+
+        res.status(200).json({ success: true, message: '비밀번호가 성공적으로 변경되었습니다.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: '서버 오류' });
+    }
+});
 module.exports = router;

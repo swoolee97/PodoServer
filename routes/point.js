@@ -1,9 +1,5 @@
 const express = require('express');
-router = express.Router();
-const bodyParser = require('body-parser');
-const app = express();
-
-app.use(bodyParser.json());
+const router = express.Router();
 
 // 가라데이터
 const pointData = [
