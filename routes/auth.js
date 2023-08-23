@@ -192,7 +192,8 @@ router.post('/kakao', async (req, res) => {
 // 비밀번호 재설정
 router.post('/resetPassword', async (req, res) => {
     const {user_email, new_password, confirm_password } = req.body;
-  
+    const passwordRegEx = /^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,20}$/;
+    
     // 기본 유효성 검사
     if (!new_password || !confirm_password) {
         return res.status(400).json({ success: false, message: '새로운 비밀번호와 확인 비밀번호는 필수입니다.' });
