@@ -61,8 +61,7 @@ router.post('/login', async (req, res) => {
         })
         return;
     }
-    const passwordOk = bcrypt.compare(password, user.user_password)
-
+    const passwordOk = await bcrypt.compare(password, user.user_password)
     if (passwordOk) {
         let accessToken = jwt.sign({ user_email: user.user_email }, process.env.JWT_SECRET_KEY, {
             expiresIn: '1m'
@@ -148,37 +147,16 @@ router.post('/register', async (req, res) => {
     }
 })
 
-
-
-
-
-
-
-
-
 // 비밀번호 재설정
 router.post('/resetPassword', async (req, res) => {
-    const { user_email, new_password, confirm_password } = req.body;
-
-    if (String(new_password).length < 8 || String(confirm_password).length < 8) {
-        return res.status(400).json({ success: false, message: '비밀번호는 8자 이상으로 생성해주세요.' });
-    }
-
-    if (!new_password || !confirm_password) {
-        return res.status(400).json({ success: false, message: '새로운 비밀번호와 확인 비밀번호는 필수입니다.' });
-    }
-
-    if (new_password !== confirm_password) {
-        return res.status(400).json({ success: false, message: '새로운 비밀번호와 확인 비밀번호가 일치하지 않습니다.' });
-    }
-
+    const user_email = req.body.user_email;
+    const new_password = req.body.newPassword
     try {
         // 사용자 찾기
-        const user = await User.findOne({ user_email });
+        let user = await User.findOne({ 'user_email' : user_email });
         if (!user) {
             return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
         }
-        
         // 기존 비밀번호와 새 비밀번호가 같은지 확인
         const passwordMatch = await bcrypt.compare(new_password, user.user_password);
         if (passwordMatch) {
@@ -246,14 +224,5 @@ router.post('/kakao', async (req, res) => {
         })
     }
 });
-router.post('/login/reset', (req,res)=>{
-    const body = req.body;
-    console.log(body)
-    res.status(500).json({
-        message : '실패',
-        success : true
-    })
-})
-
 
 module.exports = router;
