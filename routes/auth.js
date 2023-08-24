@@ -2,6 +2,7 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcrypt')
+const mongoose = require('mongoose')
 const models = require('../models')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
@@ -147,6 +148,67 @@ router.post('/register', async (req, res) => {
     }
 })
 
+
+
+
+
+
+
+
+
+// 비밀번호 재설정
+router.post('/resetPassword', async (req, res) => {
+    const { user_email, new_password, confirm_password } = req.body;
+
+    if (String(new_password).length < 8 || String(confirm_password).length < 8) {
+        return res.status(400).json({ success: false, message: '비밀번호는 8자 이상으로 생성해주세요.' });
+    }
+
+    if (!new_password || !confirm_password) {
+        return res.status(400).json({ success: false, message: '새로운 비밀번호와 확인 비밀번호는 필수입니다.' });
+    }
+
+    if (new_password !== confirm_password) {
+        return res.status(400).json({ success: false, message: '새로운 비밀번호와 확인 비밀번호가 일치하지 않습니다.' });
+    }
+
+    try {
+        // 사용자 찾기
+        const user = await User.findOne({ user_email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: '사용자를 찾을 수 없습니다.' });
+        }
+        
+        // 기존 비밀번호와 새 비밀번호가 같은지 확인
+        const passwordMatch = await bcrypt.compare(new_password, user.user_password);
+        if (passwordMatch) {
+            return res.status(400).json({ success: false, message: '이전과 다른 비밀번호를 설정해주세요.' });
+        }
+        
+        // 새 비밀번호 해싱
+        const hashedNewPassword = await bcrypt.hash(new_password, 10);
+
+        // 비밀번호 업데이트
+        user.user_password = hashedNewPassword;
+        await user.save(); // 변경사항을 몽고DB에 저장
+
+        res.status(200).json({ success: true, message: '비밀번호가 성공적으로 변경되었습니다.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: '서버 오류' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
 //? /kakao로 요청오면, 카카오 로그인 페이지로 가게 되고, 카카오 서버를 통해 카카오 로그인을 하게 되면, 다음 라우터로 요청한다.
 router.post('/kakao', async (req, res) => {
     let body = req.body;
@@ -184,4 +246,14 @@ router.post('/kakao', async (req, res) => {
         })
     }
 });
+router.post('/login/reset', (req,res)=>{
+    const body = req.body;
+    console.log(body)
+    res.status(500).json({
+        message : '실패',
+        success : true
+    })
+})
+
+
 module.exports = router;
