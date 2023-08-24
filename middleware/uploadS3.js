@@ -15,6 +15,7 @@ const uploadS3 = multer({
         s3 : s3,
         bucket : 'parantestbucket2',
         key : (req, file, callback) => {
+            console.log('@@@@@@@ : ',req)
             const extension = path.extname(file.originalname)
             if(!allowedExtensions.includes(extension)){
                 return callback(new Error('wrong extension'))

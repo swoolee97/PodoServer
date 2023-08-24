@@ -9,14 +9,13 @@ const verifyAccessToken = require('../middleware/verifyingToken')
 const GifticonFetcher = require('../middleware/GifticonFetcher')
 const multer = require('multer')
 const bodyParser = require('body-parser')
+const parseKoreanDate = require('../CommonMethods/parseKoreanDate');
+const { MongoServerError } = require('mongodb');
 
-// 기부 라우터
 // 토큰 유효성 검사 => 기프티콘 정보 추출 => db에 업로드.
-// 라우터 정의하는 순서 ? 1. 엔드포인트 2. 미들웨어 순서대로 3. 콜백함수 정의
-router.post('/upload', verifyAccessToken, uploadS3.single('files'), async (req, res) => {
-    console.log('s3업로드 미들웨어 다녀온 후 req.file 뭐가 많아야 함. location 포함해야함 : ',req.file)
+router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
-    if (!req.file || !req.file.location) {
+    if (!req.file || !req.location) {
         //file을 못받았거나 업로드에 실패했으면 실패메시지 전송
         return res.status(500).json({
             message: '파일 오류 : 관리자에게 문의하세요',
@@ -24,51 +23,48 @@ router.post('/upload', verifyAccessToken, uploadS3.single('files'), async (req, 
     }
     const s3 = new aws.S3()
     //db에 저장
-
-    //가라 기프티콘 데이터 만들기
-    const createRandomCode = () => {
-        return (String(Math.floor(Math.random() * 1000000)).padStart(6, "0"))
-    }
-    const fakeBarcodeNumber = createRandomCode();
-    let gifticon_name = '';
-    if(fakeBarcodeNumber%4 == 0) {gifticon_name = '영화';}
-    else if(fakeBarcodeNumber%4 == 1) gifticon_name = '상품권'
-    else if(fakeBarcodeNumber%4 == 2) gifticon_name = '라면'
-    else if(fakeBarcodeNumber%4 == 3) gifticon_name = '투썸'
+    const donor_email = req.headers['user_email']
     const price = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
     try {
-        let today = new Date();
+        const todate = parseKoreanDate(req.expiration_date)
         const gifticon = new Gifticon({
-            donor_email: req.donor_email,
+            donor_email: donor_email,
             receiver_email: null,
-            gifticon_name: `${gifticon_name}`,
-            company: 'kakao',
+            gifticon_name: req.product_name,
+            company: req.exchange_place,
             price: price,
             category: 'food',
-            barcode_number: fakeBarcodeNumber,
-            todate: today.toISOString().slice(0, 10),
-            url: req.file.location
+            barcode_number: 11111111,
+            todate: todate,
+            url: req.location
         })
         await gifticon.save();
         const newAccessToken = req.accessToken;
         return res.status(200).json({
-            accessToken: req.accessToken ?? req.body.accessToken,
+            accessToken: newAccessToken ?? req.body.accessToken,
             message: '기부 성공!'
         })
     } catch (error) {
-        var params = {
-            Bucket: 'parantestbucket3',
-            Key: req.file.key,
+        if (error instanceof MongoServerError && error.code === 11000) {
+            var params = {
+                Bucket: 'parantestbucket2',
+                Key: req.key,
+            }
+            // s3에 성공, db에 실패했을 때 s3에 올라간 이미지 다시 삭제
+            s3.deleteObject(params, (err, data) => {
+                if (err) {
+                    console.error(err)
+                }
+            })
+            console.error(error)
+            return res.status(500).json({
+                message: '이미 등록된 기프티콘입니다'
+            })
         }
-        // s3에 성공, db에 실패했을 때
-        s3.deleteObject(params, (err, data) => {
-            
-        })
-        console.error(error)
         // s3 저장 실패
         return res.status(500).json({
             accessToken: req.accessToken,
-            message: '이미 등록된 기프티콘입니다',
+            message: 'db저장 에러',
         })
     }
 });
@@ -111,16 +107,16 @@ router.get('/search', async (req, res) => {
     const keyword = req.query.keyword;
     const page = req.query.page;
     const limit = 10;
-    const skip = (page-1)*limit;
+    const skip = (page - 1) * limit;
     try {
         const regex = new RegExp(keyword, 'i');
         const gifticons = await Gifticon.find({ gifticon_name: regex }).skip(skip).limit(10);
         const hasMore = gifticons.length === limit;
         if (gifticons.length === 0) {
-            return res.status(404).json({gifticons : [], message: '기프티콘 더 없음', hasMore : hasMore });
+            return res.status(404).json({ gifticons: [], message: '기프티콘 더 없음', hasMore: hasMore });
         }
-        
-        res.status(200).json({gifticons : gifticons, hasMore : hasMore});
+
+        res.status(200).json({ gifticons: gifticons, hasMore: hasMore });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
