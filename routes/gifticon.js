@@ -1,7 +1,6 @@
 // UploadGifticon에서 기부하기 버튼 눌렀을 때
 const aws = require('aws-sdk');
 const express = require('express');
-const uploadS3 = require('../middleware/uploadS3');
 const Gifticon = require('../models/Gifticon')
 const jwt = require('jsonwebtoken')
 const router = express.Router();
@@ -15,7 +14,7 @@ const { MongoServerError } = require('mongodb');
 // 토큰 유효성 검사 => 기프티콘 정보 추출 => db에 업로드.
 router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
-    if (!req.file || !req.location) {
+    if (!req.files || !req.location) {
         //file을 못받았거나 업로드에 실패했으면 실패메시지 전송
         return res.status(500).json({
             message: '파일 오류 : 관리자에게 문의하세요',

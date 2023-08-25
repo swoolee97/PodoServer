@@ -24,7 +24,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/api/auth', require('./routes/auth')); // api auth 시작하는 것들은 routes auth로 보낸다.
-app.use('/api/mypage', require('./routes/mypage'));
 app.use('/api/emailAuth', require('./mailAuth'));
 app.use('/api/gifticon', require('./routes/gifticon'));
 app.use('/api/point', require('./routes/point'));

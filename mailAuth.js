@@ -11,14 +11,9 @@ router.use(bodyParser.json())
 require('dotenv').config()
 
 router.post('/', async (req, res) => {
-    //req.body.목적
-    console.log(req.body)
     let purpose = req.body.purpose;
     let toEmail = req.body.user_email
-    console.log(toEmail)
-    // 인증번호 이메일 보내기
-    
-    
+
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -38,12 +33,11 @@ router.post('/', async (req, res) => {
 
     try {
         let info = await transporter.sendMail(mailOptions)
-        res.json({success : true, randomCode : randomCode})
+        return res.status(500).json({success : true, randomCode : randomCode})
     } catch (error) {
         console.error(error)
-        res.json({success : false})
+        return res.status(200).json({success : false})
     }
-    // console.log('Message sent: %s', info.messageId);
 })
 
 module.exports = router
