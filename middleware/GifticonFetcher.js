@@ -21,7 +21,6 @@ const GifticonFetcher = async (req, res, next) => {
     try {
         // multer로 파일 파싱
         upload.array('files',2)(req, res, async (err) => {
-            console.log(req.files)
             // 파일이 클라이언트에서 제대로 전송되었는지 확인
             if (!req.files || req.files.length != 2) {
                 return res.status(400).send({message : '기프티콘 이미지는 두 장이어야 합니다'});
@@ -31,7 +30,6 @@ const GifticonFetcher = async (req, res, next) => {
                 mimetype: files.mimetype,
                 originalname: files.originalname
             }));
-            console.log('req.tempfiles : ', req.tempFiles)
             const formData = new FormData();
 
             req.tempFiles.forEach(tempFile => {
@@ -48,10 +46,14 @@ const GifticonFetcher = async (req, res, next) => {
             });
             
             const data = await response.json()
-            const date = parseKoreanDateString(data[0].expiration_date)
-            req.product_name = data[0].product_name;
-            req.exchange_place = data[0].exchange_place;
-            req.expiration_date = data[0].expiration_date;
+            if(!data.is_matching_barcodes){
+                return res.status(501).json({message : '동일한 기프티콘을 등록해주세요'})
+            }
+            
+            req.product_name = data.results[0].product_name;
+            req.exchange_place = data.results[0].exchange_place;
+            req.expiration_date = data.results[0].expiration_date;
+            req.barcode_number = data.results[0].barcode_number
             
             // s3업로드
             const params = {

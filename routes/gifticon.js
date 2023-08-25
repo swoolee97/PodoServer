@@ -33,7 +33,7 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
             company: req.exchange_place,
             price: price,
             category: 'food',
-            barcode_number: 11111111,
+            barcode_number: req.barcode_number,
             todate: todate,
             url: req.location
         })
