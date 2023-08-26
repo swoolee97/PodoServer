@@ -39,6 +39,10 @@ const UserSchema = new mongoose.Schema({
         type : Boolean,
         default : false, 
     },
+    login_failed_count : {
+        type : Number,
+        default :0,
+    }
 });
 
 const User = mongoose.model('User',UserSchema);
