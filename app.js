@@ -27,6 +27,7 @@ app.use('/api/auth', require('./routes/auth')); // api auth 시작하는 것들�
 app.use('/api/emailAuth', require('./mailAuth'));
 app.use('/api/gifticon', require('./routes/gifticon'));
 app.use('/api/point', require('./routes/point'));
+app.use('/api/mission', require('./routes/mission'))
 
 app.listen(3001, () => {
     console.log('listening@@commit7777')
