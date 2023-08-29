@@ -3,6 +3,7 @@ const cors = require('cors');
 const passport = require('passport');
 // asdf
 const session = require('express-session');
+const feedRoutes = require('./routes/feed');
 // const morgan = require('morgan');
 const app = express();
 require('dotenv').config()
@@ -28,6 +29,7 @@ app.use('/api/emailAuth', require('./mailAuth'));
 app.use('/api/gifticon', require('./routes/gifticon'));
 app.use('/api/point', require('./routes/point'));
 app.use('/api/mission', require('./routes/mission'))
+app.use('/api/feed',feedRoutes);
 
 app.listen(3001, () => {
     console.log('listening@@commit7777')
