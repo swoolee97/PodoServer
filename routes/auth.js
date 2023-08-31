@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
 const models = require('../models')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
+const Card = require('../models/Card')
 const RefreshToken = require('../models/RefreshToken')
 const passport = require('passport');
 require('dotenv').config()
@@ -54,10 +55,10 @@ router.post('/login', async (req, res) => {
             login: false,
         })
     }
-    if(user.login_failed_count == 5){
+    if (user.login_failed_count == 5) {
         return res.status(501).json({
-            message : '비밀번호 재설정 후 다시 시도해주세요',
-            login : false,
+            message: '비밀번호 재설정 후 다시 시도해주세요',
+            login: false,
         })
     }
     const passwordOk = await bcrypt.compare(password, user.user_password)
@@ -88,9 +89,9 @@ router.post('/login', async (req, res) => {
                 message: `비밀번호 ${user.login_failed_count}회 오류`,
                 login: false,
             })
-        }else if(user.login_failed_count == 5){
+        } else if (user.login_failed_count == 5) {
             return res.status(501).json({
-                message : `비밀번호 재설정 후 다시 시도해주세요`
+                message: `비밀번호 재설정 후 다시 시도해주세요`
             })
         }
     }
@@ -201,5 +202,7 @@ router.post('/kakao', async (req, res) => {
         })
     }
 });
+
+
 
 module.exports = router;

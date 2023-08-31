@@ -42,6 +42,9 @@ const UserSchema = new mongoose.Schema({
     login_failed_count : {
         type : Number,
         default :0,
+    },
+    card_number : {
+        type : String,
     }
 });
 
