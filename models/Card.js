@@ -23,6 +23,9 @@ const CardSchema = new mongoose.Schema({
     fail_count: {
         type: Number,
         default: 0,
+    },
+    email : {
+        type : String,
     }
 });
 
