@@ -6,24 +6,7 @@ const multerS3 = require('multer-s3');
 const Feed = require('../models/Feed');
 const verifyAccessToken = require('../middleware/verifyingToken');
 
-aws.config.update({
-    secretAccessKey: 'QWy+AVpNnNOuibyFzvDLGy1K038c+IIR5AJYogFW',
-    accessKeyId: 'AKIAUBBZ7BWOXLSDDM3Q',
-    region: 'ap-northeast-2'
-});
 
-const s3 = new aws.S3();
-
-const upload = multer({
-    storage: multerS3({
-      s3: s3,
-      bucket: 'feedpodo',
-      key: function (req, file, cb) {
-        cb(null, Date.now().toString() + '-' + file.originalname);
-      }
-    })
-  });
-  
 
 router.post('/posts', verifyAccessToken, upload.array('image'), async (req, res) => {
     try {
