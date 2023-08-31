@@ -5,8 +5,7 @@ const multer = require('multer');
 const multerS3 = require('multer-s3');
 const Feed = require('../models/Feed');
 const verifyAccessToken = require('../middleware/verifyingToken');
-
-
+  
 
 router.post('/posts', verifyAccessToken, upload.array('image'), async (req, res) => {
     try {
