@@ -10,12 +10,8 @@ const FeedSchema = new mongoose.Schema({
         default: null,
     },
     imageUrl: {
-        type: [String],
+        type: String,
         default: null
-    },
-    createdAt: { 
-        type: Date, 
-        default: Date.now 
     }
 });
 
