@@ -6,9 +6,11 @@ const mongoose = require('mongoose')
 const models = require('../models')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
+const Card = require('../models/Card')
 const RefreshToken = require('../models/RefreshToken')
 const passport = require('passport');
 require('dotenv').config()
+const faker = require('faker');
 
 router.use(express.json())
 const saveRefreshToken = async (userEmail) => {
@@ -54,10 +56,10 @@ router.post('/login', async (req, res) => {
             login: false,
         })
     }
-    if(user.login_failed_count == 5){
+    if (user.login_failed_count == 5) {
         return res.status(501).json({
-            message : '비밀번호 재설정 후 다시 시도해주세요',
-            login : false,
+            message: '비밀번호 재설정 후 다시 시도해주세요',
+            login: false,
         })
     }
     const passwordOk = await bcrypt.compare(password, user.user_password)
@@ -88,9 +90,9 @@ router.post('/login', async (req, res) => {
                 message: `비밀번호 ${user.login_failed_count}회 오류`,
                 login: false,
             })
-        }else if(user.login_failed_count == 5){
+        } else if (user.login_failed_count == 5) {
             return res.status(501).json({
-                message : `비밀번호 재설정 후 다시 시도해주세요`
+                message: `비밀번호 재설정 후 다시 시도해주세요`
             })
         }
     }
@@ -201,5 +203,69 @@ router.post('/kakao', async (req, res) => {
         })
     }
 });
+
+router.post('/certification', async (req, res) => {
+    const body = req.body;
+    const month = Number.parseInt(body.month);
+    const year = Number.parseInt(body.year);
+    const cvc = body.cvc;
+    const password = body.password;
+    const email = body.email;
+
+    const card = await Card.findOne({
+        card_number: body.cardNumber,
+    })
+    if (!card) {
+        return res.status(500).json({ message: '일치하는 카드가 없습니다' });
+    }
+    const cvcCorrect = await bcrypt.compare(cvc,card.cvc)
+    const passwordCorrect = await bcrypt.compare(password,card.password)
+    
+    if (card.month !== month || card.year !== year || !cvcCorrect || !passwordCorrect) {
+        return res.status(500).json({ message: '뭔가 일치하지 않음' })
+    }
+    else {
+        const user = await User.findOne({
+            user_email: email
+        })
+        user.is_receiver = true;
+        user.card_number = body.cardNumber;
+        await user.save();
+        return res.status(200).json({ message: '인증 완료', success: true })
+    }
+})
+
+const saltRounds = 10;
+router.get('/fake', (req, res) => {
+    const generateFakeCardData = async () => {
+        const card_number = faker.helpers.replaceSymbolWithNumber("################").slice(0, 16);
+        const month = faker.random.number({ min: 1, max: 12 });
+        const year = faker.random.number({ min: 22, max: 30 });  // 2022년부터 2030년까지
+        const cvc = faker.helpers.replaceSymbolWithNumber("###").slice(0, 3);
+        const password = faker.random.number({ min: 1000, max: 9999 });
+        console.log(card_number)
+        console.log(month)
+        console.log(year)
+        console.log(cvc)
+        console.log(password)
+        const hashedCVC = await bcrypt.hash(cvc, saltRounds);
+        const hashedPassword = await bcrypt.hash(password.toString(), saltRounds);
+
+        return {
+            card_number,
+            month,
+            year,
+            cvc: hashedCVC,
+            password: hashedPassword,
+        };
+    };
+    const fillFakeCardData = async () => {
+        const fakeCardData = await generateFakeCardData();
+        const newCard = new Card(fakeCardData);
+        return newCard.save();  // 저장하고 Promise 반환
+    };
+    fillFakeCardData();
+    res.status(200).json({message : '가짜카드 생성완료'})
+})
 
 module.exports = router;
