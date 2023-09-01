@@ -48,6 +48,7 @@ router.post('/certification', async (req, res) => {
             user_email: email
         })
         card.email = email;
+        card.fail_count = 0;
         user.is_receiver = true;
         user.card_number = body.cardNumber;
         await user.save();
