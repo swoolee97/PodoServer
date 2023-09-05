@@ -22,3 +22,4 @@ const FeedSchema = new mongoose.Schema({
 const Feed = mongoose.model('Post', FeedSchema);
 
 module.exports = Feed;
+
