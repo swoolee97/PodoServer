@@ -1,24 +1,28 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+
+const getToDate = () => {
+    const to_date = new Date();
+    to_date.setDate(new Date().getDate() + 180);
+    return to_date;
+};
+
 const PointSchema = new mongoose.Schema({
-    user_id :{ // 이메일임.
-        type : String,
-        required : true,
+    userEmail: {  // 이름 변경
+        type: String,
+        required: true,
     },
-    
-    price : {
-        type : Number,
-        default : 100,
+    price: {
+        type: Number,
+        default: 100,
+        min: 0, 
     },
-    to_date : {
-        type :Date,
-        default : () => {
-            const to_date = new Date();
-            to_date.setDate(new Date().getDate() + 180);
-            return to_date;
-        },
+    to_date: {
+        type: Date,
+        default: getToDate, 
     }
-})
+});
+
 const UserSchema = new mongoose.Schema({
     user_email: {
         type: String,
