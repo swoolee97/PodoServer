@@ -8,11 +8,7 @@ const getToDate = () => {
 };
 
 const PointSchema = new mongoose.Schema({
-    userEmail: {  // 이름 변경
-        type: String,
-        required: true,
-    },
-    price: {
+    point: {
         type: Number,
         default: 100,
         min: 0, 
