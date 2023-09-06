@@ -40,7 +40,7 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
         await gifticon.save();
         const newAccessToken = req.accessToken;
         return res.status(200).json({
-            accessToken: newAccessToken ?? req.body.accessToken,
+            accessToken: newAccessToken ?? req.headers['authorization'||""].split(' ')[1],
             message: '기부 성공!'
         })
     } catch (error) {
