@@ -30,6 +30,7 @@ app.use('/api/gifticon', require('./routes/gifticon'));
 app.use('/api/point', require('./routes/point'));
 app.use('/api/mission', require('./routes/mission'))
 app.use('/api/feed',feedRoutes);
+
 app.use('/api/card',require('./routes/card'))
 
 app.listen(3001, () => {
