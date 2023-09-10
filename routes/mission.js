@@ -3,8 +3,7 @@ const router = express.Router();
 const missionList = require('../missionList.json')
 const bodyParser = require('body-parser')
 const CompletedMission = require('../models/CompletedMission')
-const User = require('../models/User')
-const moment = require('moment-timezone');
+
 let today, startDate, endDate;
 // 미션을 만든 적 있는지 판단하는 라우터
 const updateDates = () => {
@@ -18,8 +17,7 @@ const updateDates = () => {
     endDate.setUTCHours(23, 59, 59, 999);
 }
 router.get('/isMissionCompleted', async (req, res) => {
-    const user_email = req.query.email;
-    const user = await User.findOne({ 'user_email': user_email })
+    const user_email = req.query.user_email;
     // 수혜자가 아니면 리턴
     // if (!user || !user.is_receiver) {
     //     console.log('수혜자 아님')
@@ -29,8 +27,8 @@ router.get('/isMissionCompleted', async (req, res) => {
     const record = await CompletedMission.findOne({
         email: user_email,
         completedDate: {
-            $gte: startDate,
-            $lte: endDate
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
         }
     });
     if (record) {
