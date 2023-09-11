@@ -4,6 +4,7 @@ const missionList = require('../missionList.json')
 const bodyParser = require('body-parser')
 const CompletedMission = require('../models/CompletedMission')
 const User = require('../models/User')
+const Mission = require('../models/Point')
 const moment = require('moment-timezone');
 let today, startDate, endDate;
 // 미션을 만든 적 있는지 판단하는 라우터
@@ -21,10 +22,10 @@ router.get('/isMissionCompleted', async (req, res) => {
     const user_email = req.query.email;
     const user = await User.findOne({ 'user_email': user_email })
     // 수혜자가 아니면 리턴
-    // if (!user || !user.is_receiver) {
-    //     console.log('수혜자 아님')
-    //     return res.status(200).json({ completed: true })
-    // }
+    if (!user || !user.is_receiver) {
+        console.log('수혜자 아님')
+        return res.status(200).json({ completed: true })
+    }
     updateDates();
     const record = await CompletedMission.findOne({
         email: user_email,
@@ -82,6 +83,15 @@ router.post('/save', async (req, res) => {
     })
     completedMission.text = text;
     await completedMission.save();
+    const mission = new Mission({
+        email : email,
+        price : 100,
+        from : '일일 미션',
+        createdAt : today,
+        expireAt : new Date(today.getTime() + (24*60*60*1000*180)).setUTCHours(0,0,0,0)
+    })
+    await mission.save();
+
     return res.status(200).json({ success: true, message: '미션을 완료했어요!' })
 })
 

@@ -28,15 +28,12 @@ const upload = multer({
 router.post('/posts', verifyAccessToken, upload.array('image'), async (req, res) => {
     try {
 
-        console.log(req)
         const email = req.headers['user_email'];
         const text = req.body.text;
         
         // 이미지 처리
         const images = req.files;
         const imageUrls = images.map(file => file.location);
-    
-        console.log("Image URLs: ", imageUrls);
 
         // 새로운 피드 객체 생성
         const newPost = new Feed({ email, text, imageUrl: imageUrls });

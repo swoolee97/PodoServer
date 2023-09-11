@@ -40,6 +40,11 @@ const GifticonSchema = new mongoose.Schema({
     todate: {
         type: Date,
         required: true,
+    },
+    is_valid : {
+        type : Boolean,
+        required :true,
+        default : true,
     }
 })
 
