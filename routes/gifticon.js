@@ -1,5 +1,6 @@
 // UploadGifticon에서 기부하기 버튼 눌렀을 때
 const aws = require('aws-sdk');
+const s3 = new aws.S3();
 const express = require('express');
 const Gifticon = require('../models/Gifticon')
 const User = require('../models/User')
@@ -12,9 +13,24 @@ const bodyParser = require('body-parser')
 const parseKoreanDate = require('../CommonMethods/parseKoreanDate');
 const { MongoServerError } = require('mongodb');
 const updateDates = require('../CommonMethods/updateDates')
+const multerS3 = require('multer-s3')
 let today, startDate, endDate;
 // 미션을 만든 적 있는지 판단하는 라우터
 // 토큰 유효성 검사 => 기프티콘 정보 추출 => db에 업로드.
+aws.config.update({
+    secretAccessKey: process.env.GIFTICON_AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.GIFTICON_AWS_ACCESS_KEY_ID,
+    region: 'ap-northeast-2'
+});
+const upload = multer({
+    storage: multerS3({
+      s3: s3,
+      bucket: 'test-s3',
+      key: function (req, file, cb) {
+        cb(null, Date.now().toString() + '-' + file.originalname);
+      }
+    })
+  });
 router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
     if (!req.files || !req.location) {
@@ -71,7 +87,7 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     }
 });
 
-const upload = multer();
+
 router.use(bodyParser.urlencoded({ extended: true }), bodyParser.json(), upload.none());
 
 
