@@ -25,12 +25,13 @@ aws.config.update({
 const upload = multer({
     storage: multerS3({
       s3: s3,
-      bucket: 'test-s3',
+      bucket: 'parantestbucket2',
       key: function (req, file, cb) {
         cb(null, Date.now().toString() + '-' + file.originalname);
       }
     })
   });
+  
 router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
     if (!req.files || !req.location) {
@@ -108,7 +109,7 @@ router.get('/list', async (req, res) => {
     const skip = (page - 1) * limit;
     try {
         const gifticons = await Gifticon.find({
-            is_valid: true,
+            is_valid: true || null,
             todate: {
                 $gte: today,
             }
@@ -116,6 +117,7 @@ router.get('/list', async (req, res) => {
             .sort({ _id: -1 }) // -1은 내림차순 정렬
             .skip(skip)
             .limit(limit);
+            console.log(gifticons)
         const hasMore = gifticons.length === limit;
         if (gifticons.length === 0) {
             return res.status(201).json({ gifticons: [], message: '기프티콘 더 없음', loading: hasMore });
