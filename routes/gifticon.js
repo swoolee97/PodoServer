@@ -2,7 +2,8 @@
 const aws = require('aws-sdk');
 const express = require('express');
 const Gifticon = require('../models/Gifticon')
-const jwt = require('jsonwebtoken')
+const User = require('../models/User')
+const Point = require('../models/Point')
 const router = express.Router();
 const verifyAccessToken = require('../middleware/verifyingToken')
 const GifticonFetcher = require('../middleware/GifticonFetcher')
@@ -10,7 +11,9 @@ const multer = require('multer')
 const bodyParser = require('body-parser')
 const parseKoreanDate = require('../CommonMethods/parseKoreanDate');
 const { MongoServerError } = require('mongodb');
-
+const updateDates = require('../CommonMethods/updateDates')
+let today, startDate, endDate;
+// 미션을 만든 적 있는지 판단하는 라우터
 // 토큰 유효성 검사 => 기프티콘 정보 추출 => db에 업로드.
 router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
@@ -40,7 +43,7 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
         await gifticon.save();
         const newAccessToken = req.accessToken;
         return res.status(200).json({
-            accessToken: newAccessToken ?? req.headers['authorization'||""].split(' ')[1],
+            accessToken: newAccessToken ?? req.headers['authorization' || ""].split(' ')[1],
             message: '기부 성공!'
         })
     } catch (error) {
@@ -81,14 +84,19 @@ router.get('/detail', async (req, res) => {
         res.status(500).json({ success: false })
         console.error(error)
     }
-
 })
 router.get('/list', async (req, res) => {
+    [today,startDate,endDate] = updateDates();
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
     try {
-        const gifticons = await Gifticon.find()
+        const gifticons = await Gifticon.find({
+            is_valid: true,
+            todate : {
+                $gte : today,
+            }
+        })
             .sort({ _id: -1 }) // -1은 내림차순 정렬
             .skip(skip)
             .limit(limit);
@@ -120,6 +128,49 @@ router.get('/search', async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
+})
+router.post('/buy', async (req, res) => {
+    const email = req.body.email;
+    const gifticonId = req.body.gifticonId;
+    const user = await User.findOne({
+        user_email: email
+    })
+    const point = await Point.find({
+        email : email,
+        expireAt : {
+            $gte : today
+        }
+    })
+    if (!user) {
+        return res.status(500).json({ message: '잘못된 접근입니다' })
+    }
+    if (!user.is_receiver) {
+        return res.status(500).json({ message: '수혜자만 구매 가능합니다' })
+    }
+    updateDates();
+    const gifticon = await Gifticon.findOne({
+        _id: gifticonId,
+    })
+    if (gifticon.todate < today) {
+        gifticon.is_valid = false;
+        await gifticon.save();
+        return res.status(500).json({ message: '유효기간이 만료된 기프티콘입니다' })
+    }
+    if (!gifticon.is_valid) {
+        return res.status(500).json({
+            message: '구매할 수 없는 기프티콘입니다'
+        })
+    }
+    let sum = 0;
+    for(i=0; i<point.length; i++){
+        sum += point.price
+    }
+    if(gifticon.price>sum){
+        return res.status(500).json({ message :'포인트가 부족합니다' })
+    }else{
+        gifticon.is_valid = false;
+    }
+    return res.status(200).json({ gifticon })
 })
 
 

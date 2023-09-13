@@ -7,18 +7,6 @@ const getToDate = () => {
     return to_date;
 };
 
-const PointSchema = new mongoose.Schema({
-    point: {
-        type: Number,
-        default: 100,
-        min: 0, 
-    },
-    to_date: {
-        type: Date,
-        default: getToDate, 
-    }
-});
-
 const UserSchema = new mongoose.Schema({
     user_email: {
         type: String,
@@ -34,7 +22,6 @@ const UserSchema = new mongoose.Schema({
         // required: true,
         maxLength :100,
     },
-    point: [PointSchema],
     is_receiver: {
         type : Boolean,
         default : false, 

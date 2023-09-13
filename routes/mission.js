@@ -3,27 +3,20 @@ const router = express.Router();
 const missionList = require('../missionList.json')
 const bodyParser = require('body-parser')
 const CompletedMission = require('../models/CompletedMission')
-
+const User = require('../models/User')
+const Point = require('../models/Point')
+const moment = require('moment-timezone');
+const updateDates = require('../CommonMethods/updateDates')
 let today, startDate, endDate;
 // 미션을 만든 적 있는지 판단하는 라우터
-const updateDates = () => {
-    today = new Date().getTime() + (9 * 60 * 60 * 1000);
-    today = new Date(today)
-    // 오늘 날짜의 시작 시각 설정 (00:00:00)
-    startDate = new Date(today);
-    startDate.setUTCHours(0, 0, 0, 0);
-    // 오늘 날짜의 마지막 시각 설정 (23:59:59)
-    endDate = new Date(today);
-    endDate.setUTCHours(23, 59, 59, 999);
-}
 router.get('/isMissionCompleted', async (req, res) => {
     const user_email = req.query.user_email;
     // 수혜자가 아니면 리턴
-    // if (!user || !user.is_receiver) {
-    //     console.log('수혜자 아님')
-    //     return res.status(200).json({ completed: true })
-    // }
-    updateDates();
+    if (!user || !user.is_receiver) {
+        console.log('수혜자 아님')
+        return res.status(200).json({ completed: true })
+    }
+    [today,startDate,endDate] = updateDates(0);
     const record = await CompletedMission.findOne({
         email: user_email,
         completedDate: {
@@ -40,8 +33,8 @@ router.get('/isMissionCompleted', async (req, res) => {
 // 미션 생성하는 라우터. 
 // 오늘 만든 적 있으면 만든걸로 진행하고 만든 적 없으면 새로만들어서 진행.
 router.get('/createMission', async (req, res) => {
-    const user_email = req.query.email
-    updateDates();
+    const user_email = req.query.email;
+    [today,startDate,endDate] = updateDates(0);
     const record = await CompletedMission.findOne({
         email: user_email,
         completedDate: {
@@ -70,7 +63,7 @@ router.get('/createMission', async (req, res) => {
 router.post('/save', async (req, res) => {
     const text = req.body.text;
     const email = req.body.email;
-    updateDates();
+    [today,startDate,endDate] = updateDates(0);
     let completedMission = await CompletedMission.findOne({
         email: email,
         completedDate: {
@@ -80,6 +73,15 @@ router.post('/save', async (req, res) => {
     })
     completedMission.text = text;
     await completedMission.save();
+    const point = new Point({
+        email : email,
+        price : 100,
+        from : '일일 미션',
+        createdAt : today,
+        expireAt : new Date(today.getTime() + (24*60*60*1000*180)).setUTCHours(0,0,0,0)
+    })
+    await point.save();
+
     return res.status(200).json({ success: true, message: '미션을 완료했어요!' })
 })
 
