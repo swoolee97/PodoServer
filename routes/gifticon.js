@@ -86,15 +86,15 @@ router.get('/detail', async (req, res) => {
     }
 })
 router.get('/list', async (req, res) => {
-    [today,startDate,endDate] = updateDates();
+    [today, startDate, endDate] = updateDates();
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
     try {
         const gifticons = await Gifticon.find({
             is_valid: true,
-            todate : {
-                $gte : today,
+            todate: {
+                $gte: today,
             }
         })
             .sort({ _id: -1 }) // -1은 내림차순 정렬
@@ -136,10 +136,7 @@ router.post('/buy', async (req, res) => {
         user_email: email
     })
     const point = await Point.find({
-        email : email,
-        expireAt : {
-            $gte : today
-        }
+        email: email,
     })
     if (!user) {
         return res.status(500).json({ message: '잘못된 접근입니다' })
@@ -158,17 +155,32 @@ router.post('/buy', async (req, res) => {
     }
     if (!gifticon.is_valid) {
         return res.status(500).json({
-            message: '구매할 수 없는 기프티콘입니다'
+            message: '이미 판매된 기프티콘입니다'
         })
     }
     let sum = 0;
-    for(i=0; i<point.length; i++){
-        sum += point.price
+    for (i = 0; i < point.length; i++) {
+        sum += point[i].price
     }
-    if(gifticon.price>sum){
-        return res.status(500).json({ message :'포인트가 부족합니다' })
-    }else{
-        gifticon.is_valid = false;
+    if (gifticon.price > sum) {
+        return res.status(500).json({ message: '포인트가 부족합니다', buy : false })
+    } else {
+        try {
+            gifticon.is_valid = false;
+            await gifticon.save();
+            const point = new Point({
+                email: user.user_email,
+                price: gifticon.price*(-1),
+                from: '기프티콘 구매',
+                createdAt: today,
+            })
+            await point.save();
+            gifticon.donor_email = user.user_email;
+            await gifticon.save();
+            return res.status(200).json({message : '구매 완료', buy : true})
+        } catch (error) {
+            console.error(error)
+        }
     }
     return res.status(200).json({ gifticon })
 })

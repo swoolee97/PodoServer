@@ -11,7 +11,6 @@ let today, startDate, endDate;
 router.get('/isMissionCompleted', async (req, res) => {
     const user_email = req.query.email;
     const user = await User.findOne({'user_email' : user_email})
-    console.log(user)
     // 수혜자가 아니면 리턴
     if (!user || !user.is_receiver) {
         console.log('수혜자 아님')

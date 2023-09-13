@@ -3,7 +3,6 @@ const router = express.Router();
 const User = require('../models/User');
 const Point = require('../models/Point')
 const updateDates = require('../CommonMethods/updateDates')
-let today, startDate, endDate;
 
 router.get('/sum', async (req, res) => {
     const userEmail = req.query.email;
@@ -14,9 +13,6 @@ router.get('/sum', async (req, res) => {
     try {
         const points = await Point.find({ 
             email: userEmail,
-            expireAt: {
-                $gte: today
-            }
         })
         let sum = 0;
         for(i=0; i<points.length; i++){

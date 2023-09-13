@@ -17,10 +17,6 @@ const PointSchema = new mongoose.Schema({
         type: Date, 
         required: true
     },
-    expireAt : { // 언제 만료되는지
-        type : Date,
-        required: true
-    }
 });
 // 2000원 포인트 쌓고 1000원 쓰고 포인트 모두 소멸되면 0원이 돼야함.
 const Point = mongoose.model('Point', PointSchema);
