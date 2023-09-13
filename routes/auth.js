@@ -67,6 +67,7 @@ router.post('/login', async (req, res) => {
             expiresIn: '2h'
         })
         // refresh token db에 저장.
+        await RefreshToken.deleteOne({'user_email' : user.user_email })
         try {
             await saveRefreshToken(user.user_email)
         } catch (err) {
@@ -78,7 +79,7 @@ router.post('/login', async (req, res) => {
         return res.status(200).json({
             message: "로그인 성공",
             login: true,
-            user_email: userEmail,
+            user_email: user.user_email,
             accessToken
         })
     } else {
@@ -175,6 +176,7 @@ router.post('/kakao', async (req, res) => {
         expiresIn: '2h'
     })
     if (user) {
+        await RefreshToken.deleteOne({'user_email' : body.email })
         await saveRefreshToken(body.email);
         res.status(203).json({
             user_email: body.email,
@@ -202,7 +204,5 @@ router.post('/kakao', async (req, res) => {
         })
     }
 });
-
-
 
 module.exports = router;

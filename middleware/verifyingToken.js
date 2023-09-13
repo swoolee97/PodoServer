@@ -11,7 +11,6 @@ const verifyAccessToken = (req, res, next) => {
     jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
         // access token이 유효하지 않다면 refresh token 유효한지 확인
         if (err) {
-            console.error(err)
             console.log('유효하지 않은 access token')
             const refreshToken = await RefreshToken.findOne({ user_email: user_email })
             if (refreshToken) {
