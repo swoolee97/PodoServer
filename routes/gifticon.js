@@ -109,7 +109,7 @@ router.get('/list', async (req, res) => {
     const skip = (page - 1) * limit;
     try {
         const gifticons = await Gifticon.find({
-            is_valid: true || null,
+            is_valid: true,
             todate: {
                 $gte: today,
             }
