@@ -22,8 +22,8 @@ const GifticonFetcher = async (req, res, next) => {
         // multer로 파일 파싱
         upload.array('files',2)(req, res, async (err) => {
             // 파일이 클라이언트에서 제대로 전송되었는지 확인
-            if (!req.files || req.files.length != 2) {
-                return res.status(400).send({message : '기프티콘 이미지는 두 장이어야 합니다'});
+            if (!req.files || req.files.length != 1) {
+                return res.status(400).send({message : '기프티콘 이미지는 한 장이어야 합니다'});
             }
             req.tempFiles = req.files.map(files => ({
                 buffer: files.buffer,
@@ -31,29 +31,39 @@ const GifticonFetcher = async (req, res, next) => {
                 originalname: files.originalname
             }));
             const formData = new FormData();
-
+            console.log(formData.getHeaders());
             req.tempFiles.forEach(tempFile => {
                 formData.append('files', tempFile.buffer, {
-                    contentType: tempFile.mimetype,
+                    type: tempFile.mimetype,
                     filename: tempFile.originalname
                 });
             });
+            
             // 글자 추출 요청
-            const response = await fetch('http://3.34.123.111:8000/upload', {
+            const response = await fetch('http://3.36.92.49:8000/upload', {
                 method: 'POST',
                 body: formData,
                 headers: formData.getHeaders()
             });
+            const data = await response.json();
+            console.log(data);
+
+            // 진짜 코드임 @@@@@@@@@@@@@
+            // if(!data.is_matching_barcodes){
+            //     return res.status(501).json({message : '동일한 기프티콘을 등록해주세요'})
+            // }
             
-            const data = await response.json()
-            if(!data.is_matching_barcodes){
-                return res.status(501).json({message : '동일한 기프티콘을 등록해주세요'})
-            }
-            
-            req.product_name = data.results[0].product_name;
-            req.exchange_place = data.results[0].exchange_place;
-            req.expiration_date = data.results[0].expiration_date;
-            req.barcode_number = data.results[0].barcode_number
+            // 진짜 코드임 @@@@@@@@@@@@@
+            // req.product_name = data.results[0].product_name;
+            // req.exchange_place = data.results[0].exchange_place;
+            // req.expiration_date = data.results[0].expiration_date;
+            // req.barcode_number = data.results[0].barcode_number
+            req.product_name = data.result.name;
+            req.price = data.result.price;
+            req.image_url = data.result.image_url;
+            req.exchange_place = data.result.exchange_place;
+            req.expiration_date = data.result.expiration_date;
+            // req.barcode_number = "1234567890"
             
             // s3업로드
             const params = {

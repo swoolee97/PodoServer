@@ -13,6 +13,7 @@ const bodyParser = require('body-parser')
 const parseKoreanDate = require('../CommonMethods/parseKoreanDate');
 const { MongoServerError } = require('mongodb');
 const updateDates = require('../CommonMethods/updateDates')
+const stringToPrice = require('../CommonMethods/stringToPrice')
 const multerS3 = require('multer-s3')
 let today, startDate, endDate;
 // 미션을 만든 적 있는지 판단하는 라우터
@@ -43,7 +44,7 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     const s3 = new aws.S3()
     //db에 저장
     const donor_email = req.headers['user_email']
-    const price = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    // const price = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
     try {
         const todate = parseKoreanDate(req.expiration_date)
         const gifticon = new Gifticon({
@@ -51,11 +52,12 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
             receiver_email: null,
             gifticon_name: req.product_name,
             company: req.exchange_place,
-            price: price,
             category: 'food',
             barcode_number: req.barcode_number,
+            price: stringToPrice(req.price),
             todate: todate,
-            url: req.location
+            url: req.location,
+            image_url : req.image_url
         })
         await gifticon.save();
         const newAccessToken = req.accessToken;
@@ -81,6 +83,7 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
             })
         }
         // s3 저장 실패
+        console.error(error)
         return res.status(500).json({
             accessToken: req.accessToken,
             message: 'db저장 에러',

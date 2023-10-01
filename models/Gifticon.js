@@ -7,6 +7,10 @@ const GifticonSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    image_url: { // 기프티콘 이미지 주소 (리스트 이미지)
+        type: String,
+        required: true,
+    },
     donor_email: {
         type: String,
         required: true,
@@ -22,7 +26,7 @@ const GifticonSchema = new mongoose.Schema({
     },
     company: {
         type: String,
-        required: true,
+        // required: true,
     },
     price: {
         type: Number,
@@ -34,8 +38,8 @@ const GifticonSchema = new mongoose.Schema({
     },
     barcode_number: {
         type: String,
-        unique: true,
-        required: true,
+        // unique: true,
+        // required: true,
     },
     todate: {
         type: Date,
