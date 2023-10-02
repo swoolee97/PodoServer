@@ -22,6 +22,7 @@ const GifticonFetcher = async (req, res, next) => {
         // multer로 파일 파싱
         upload.array('files',2)(req, res, async (err) => {
             // 파일이 클라이언트에서 제대로 전송되었는지 확인
+            console.log(req.body)
             if (!req.files || req.files.length != 1) {
                 return res.status(400).send({message : '기프티콘 이미지는 한 장이어야 합니다'});
             }
@@ -31,23 +32,12 @@ const GifticonFetcher = async (req, res, next) => {
                 originalname: files.originalname
             }));
             const formData = new FormData();
-            console.log(formData.getHeaders());
             req.tempFiles.forEach(tempFile => {
                 formData.append('files', tempFile.buffer, {
                     type: tempFile.mimetype,
                     filename: tempFile.originalname
                 });
             });
-            
-            // 글자 추출 요청
-            const response = await fetch('http://3.36.92.49:8000/upload', {
-                method: 'POST',
-                body: formData,
-                headers: formData.getHeaders()
-            });
-            const data = await response.json();
-            console.log(data);
-
             // 진짜 코드임 @@@@@@@@@@@@@
             // if(!data.is_matching_barcodes){
             //     return res.status(501).json({message : '동일한 기프티콘을 등록해주세요'})

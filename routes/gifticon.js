@@ -33,9 +33,10 @@ const upload = multer({
     })
   });
   
-router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
+router.post('/upload', upload.array('files',2), async (req, res) => {
+
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
-    if (!req.files || !req.location) {
+    if (!req.files || !req.files[0].location) {
         //file을 못받았거나 업로드에 실패했으면 실패메시지 전송
         return res.status(500).json({
             message: '파일 오류 : 관리자에게 문의하세요',
@@ -43,33 +44,33 @@ router.post('/upload', verifyAccessToken, GifticonFetcher, async (req, res) => {
     }
     const s3 = new aws.S3()
     //db에 저장
-    const donor_email = req.headers['user_email']
+    const donor_email = req.body.user_email
     // const price = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
     try {
-        const todate = parseKoreanDate(req.expiration_date)
+        const todate = parseKoreanDate(req.body.expiration_date)
         const gifticon = new Gifticon({
             donor_email: donor_email,
             receiver_email: null,
-            gifticon_name: req.product_name,
+            gifticon_name: req.body.name,
             company: req.exchange_place,
             category: 'food',
-            barcode_number: req.barcode_number,
-            price: stringToPrice(req.price),
+            barcode_number: '1236',
+            price: req.body.price,
             todate: todate,
-            url: req.location,
-            image_url : req.image_url
+            url: req.files[0].location,
+            image_url : req.body.image_url
         })
         await gifticon.save();
         const newAccessToken = req.accessToken;
         return res.status(200).json({
-            accessToken: newAccessToken ?? req.headers['authorization' || ""].split(' ')[1],
+            // accessToken: newAccessToken ?? req.headers['authorization' || ""].split(' ')[1],
             message: '기부 성공!'
         })
     } catch (error) {
         if (error instanceof MongoServerError && error.code === 11000) {
             var params = {
                 Bucket: 'parantestbucket2',
-                Key: req.key,
+                Key: req.files[0].key,
             }
             // s3에 성공, db에 실패했을 때 s3에 올라간 이미지 다시 삭제
             s3.deleteObject(params, (err, data) => {
