@@ -45,7 +45,8 @@ router.post('/upload', upload.array('files',2), async (req, res) => {
     const s3 = new aws.S3()
     //db에 저장
     const donor_email = req.body.user_email
-    // const price = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    const barcode_number = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    barcode_number = barcode_number.toString()
     try {
         const todate = parseKoreanDate(req.body.expiration_date)
         const gifticon = new Gifticon({
@@ -54,7 +55,7 @@ router.post('/upload', upload.array('files',2), async (req, res) => {
             gifticon_name: req.body.name,
             company: req.exchange_place,
             category: 'food',
-            barcode_number: '1236',
+            barcode_number: barcode_number,
             price: req.body.price,
             todate: todate,
             url: req.files[0].location,
