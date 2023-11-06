@@ -25,16 +25,16 @@ aws.config.update({
 });
 const upload = multer({
     storage: multerS3({
-      s3: s3,
-      bucket: 'parantestbucket2',
-      key: function (req, file, cb) {
-        cb(null, Date.now().toString() + '-' + file.originalname);
-      }
+        s3: s3,
+        bucket: 'parantestbucket2',
+        key: function (req, file, cb) {
+            cb(null, Date.now().toString() + '-' + file.originalname);
+        }
     })
-  });
-  
-router.post('/upload', upload.array('files',2), async (req, res) => {
+});
 
+router.post('/upload', upload.array('files',2), async (req, res) => {
+    
     //클라이언트에서 file을 잘 받았고 S3에 업로드 잘 됐는지 확인
     if (!req.files || !req.files[0].location) {
         //file을 못받았거나 업로드에 실패했으면 실패메시지 전송
@@ -119,10 +119,9 @@ router.get('/list', async (req, res) => {
                 $gte: today,
             }
         })
-            .sort({ _id: -1 }) // -1은 내림차순 정렬
-            .skip(skip)
-            .limit(limit);
-            console.log(gifticons)
+        .sort({ _id: -1 }) // -1은 내림차순 정렬
+        .skip(skip)
+        .limit(limit);
         const hasMore = gifticons.length === limit;
         if (gifticons.length === 0) {
             return res.status(201).json({ gifticons: [], message: '기프티콘 더 없음', loading: hasMore });
@@ -145,7 +144,7 @@ router.get('/search', async (req, res) => {
         if (gifticons.length === 0) {
             return res.status(404).json({ gifticons: [], message: '기프티콘 더 없음', hasMore: hasMore });
         }
-
+        
         res.status(200).json({ gifticons: gifticons, hasMore: hasMore });
     } catch (error) {
         console.error(error);
@@ -206,6 +205,47 @@ router.post('/buy', async (req, res) => {
         }
     }
     return res.status(200).json({ gifticon })
+})
+
+router.post('/purchase', async(req,res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    try{
+        const body = req.body;
+        const gifticons = await Gifticon.find({
+            receiver_email : body.email,
+            // is_valid : true
+        })
+        .sort({ _id: -1 }) // -1은 내림차순 정렬
+        .skip(skip)
+        .limit(limit);
+        const hasMore = gifticons.length === limit;
+        
+        return res.json({
+            gifticons : gifticons,
+            loading : hasMore
+        });
+    } catch (error) {
+        // 오류 처리
+        res.status(500).send(error.message);
+    }
+})
+
+router.post('/purchase/used', async(req,res) => {
+    try{
+        const gifticonId = req.body.gifticonId;
+    
+        const updateResult = await Gifticon.updateOne({ _id: gifticonId }, { $set: { is_valid: false } });
+        return res.status(200).json({
+            message : '사용 처리 되었습니다'
+        })
+    }catch(error){
+        console.log(error)
+        return res.status(500).json({
+            message : '원인 불명'
+        })
+    }
 })
 
 
