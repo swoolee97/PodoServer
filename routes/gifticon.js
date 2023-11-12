@@ -53,7 +53,7 @@ router.post('/upload', upload.array('files',2), async (req, res) => {
             donor_email: donor_email,
             receiver_email: null,
             gifticon_name: req.body.name,
-            company: req.exchange_place,
+            company: req.body.exchange_place,
             category: 'food',
             barcode_number: barcode_number,
             price: req.body.price,
