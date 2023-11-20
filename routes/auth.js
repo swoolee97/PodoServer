@@ -205,4 +205,28 @@ router.post('/kakao', async (req, res) => {
     }
 });
 
+router.post('/update', async (req,res) => {
+    try{
+        const body = req.body;
+        const updateResult = await User.updateOne({'user_email' : body.user_email} , {$set: {nick_name : body.nick_name}})
+        console.log(updateResult)
+        res.status(200).json({message : '성공'})
+    }catch(error){
+        console.log(error)
+        res.status(500).json({})
+    }
+})
+
+router.post('/isReceiver', async(req,res) => {
+    try{
+        const body = req.body;
+        const user = await User.findOne({'user_email' : body.user_email});
+        console.log(user.is_receiver)
+        res.status(200).json({isReceiver : user.is_receiver})
+    }catch(error){
+        res.status(500).json()
+    }
+})
+
+
 module.exports = router;

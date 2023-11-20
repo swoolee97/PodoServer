@@ -248,5 +248,29 @@ router.post('/purchase/used', async(req,res) => {
     }
 })
 
+router.post('/count', async (req,res) =>{
+    const email = req.body.email
+    console.log(email)
+    try{
+        const result = await Gifticon.find({'donor_email' : email})
+        console.log(result.length)
+        res.status(200).json({'count' : result.length})
+    }catch(error){
+        res.status(500).json()
+    }
+})
+
+router.post('/received', async (req,res) =>{
+    const email = req.body.email
+    console.log(email)
+    try{
+        const result = await Gifticon.find({'receiver_email' : email})
+        console.log(result.length)
+        res.status(200).json({'count' : result.length})
+    }catch(error){
+        res.status(500).json()
+    }
+})
+
 
 module.exports = router;

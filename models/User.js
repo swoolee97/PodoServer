@@ -32,6 +32,10 @@ const UserSchema = new mongoose.Schema({
     },
     card_number : {
         type : String,
+    },
+    nick_name :{
+        type :String,
+        unique : true
     }
 });
 

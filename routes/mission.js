@@ -109,4 +109,23 @@ router.get('/list', async (req, res) => {
     }
 })
 
+router.get('/sum', async(req,res) => {
+    const email = req.query.email;
+    [today,startDate,endDate] = updateDates(0);
+    try{
+        const record = await CompletedMission.find({
+            email: email,
+            completedDate: {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            },
+            text: { $ne: null } 
+        });
+        console.log(record)
+        res.status(200).json({length : record.length})
+    }catch(error){
+        console.error(error)
+    }
+})
+
 module.exports = router;
