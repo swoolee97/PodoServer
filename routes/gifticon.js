@@ -6,8 +6,6 @@ const Gifticon = require('../models/Gifticon')
 const User = require('../models/User')
 const Point = require('../models/Point')
 const router = express.Router();
-const verifyAccessToken = require('../middleware/verifyingToken')
-const GifticonFetcher = require('../middleware/GifticonFetcher')
 const multer = require('multer')
 const bodyParser = require('body-parser')
 const parseKoreanDate = require('../CommonMethods/parseKoreanDate');
@@ -45,7 +43,7 @@ router.post('/upload', upload.array('files',2), async (req, res) => {
     const s3 = new aws.S3()
     //db에 저장
     const donor_email = req.body.user_email
-    const barcode_number = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    let barcode_number = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
     barcode_number = barcode_number.toString()
     try {
         const todate = parseKoreanDate(req.body.expiration_date)
@@ -250,10 +248,8 @@ router.post('/purchase/used', async(req,res) => {
 
 router.post('/count', async (req,res) =>{
     const email = req.body.email
-    console.log(email)
     try{
         const result = await Gifticon.find({'donor_email' : email})
-        console.log(result.length)
         res.status(200).json({'count' : result.length})
     }catch(error){
         res.status(500).json()
@@ -262,10 +258,8 @@ router.post('/count', async (req,res) =>{
 
 router.post('/received', async (req,res) =>{
     const email = req.body.email
-    console.log(email)
     try{
         const result = await Gifticon.find({'receiver_email' : email})
-        console.log(result.length)
         res.status(200).json({'count' : result.length})
     }catch(error){
         res.status(500).json()
