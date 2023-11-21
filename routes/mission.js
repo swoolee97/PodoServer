@@ -85,6 +85,50 @@ router.post('/save', async (req, res) => {
     return res.status(200).json({ success: true, message: '미션을 완료했어요!' })
 })
 
+router.post('/roulette', async(req,res) => {
+    const email = req.body.email;
+    [today,startDate,endDate] = updateDates(0);
+    const completedMission = await CompletedMission.find({
+        email : email,
+        completedDate: {
+            $gte: startDate,
+            $lte: endDate
+        }
+    })
+    if(completedMission.length >= 5){
+        return res.status(201).json({message : '일일 개수 초과'})
+    }
+
+    let pointMap = new Map([
+        [0,500],
+        [1,100],
+        [2,100],
+        [3,300],
+        [4,100]
+    ])
+    const randomNumber = Math.floor(Math.random() * 5);
+    
+    const point = pointMap.get(randomNumber);
+    try{
+        const mission = new CompletedMission({
+            email : email,
+            type : "룰렛"
+        })
+        await mission.save();
+
+        const roulettePoint = new Point({
+            email :email,
+            price : point,
+            from : "룰렛",
+        })
+        await roulettePoint.save();
+        return res.status(200).json({randomNumber : randomNumber, point : point, message : '적립 완료'})
+    }catch(error){
+        console.error(error)
+    }
+
+})
+
 router.get('/list', async (req, res) => {
     const email = req.query.email;
     const page = parseInt(req.query.page) || 1;
@@ -116,12 +160,10 @@ router.get('/sum', async(req,res) => {
         const record = await CompletedMission.find({
             email: email,
             completedDate: {
-                $gte: new Date(startDate),
-                $lte: new Date(endDate),
+                $gte: startDate,
+                $lte: endDate,
             },
-            text: { $ne: null } 
         });
-        console.log(record)
         res.status(200).json({length : record.length})
     }catch(error){
         console.error(error)

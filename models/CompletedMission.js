@@ -4,7 +4,7 @@ const moment = require('moment-timezone');
 const CompletedMissionSchema = new mongoose.Schema({
     id : {
         type : Number,
-        required : true
+        // required : true
     },
     email : {
         type : String,
@@ -21,6 +21,11 @@ const CompletedMissionSchema = new mongoose.Schema({
             now.setHours(now.getHours() + 9);
             return now;
         }
+    },
+    type : {
+        type :String,
+        // required : true,
+        default : null
     }
 });
 

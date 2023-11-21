@@ -15,7 +15,12 @@ const PointSchema = new mongoose.Schema({
     },
     createdAt: { // 언제 받았는지, 썼는지
         type: Date, 
-        required: true
+        required: true,
+        default : () => {
+            const now = new Date();
+            now.setHours(now.getHours() + 9);
+            return now;
+        }
     },
 });
 // 2000원 포인트 쌓고 1000원 쓰고 포인트 모두 소멸되면 0원이 돼야함.
