@@ -49,6 +49,10 @@ const GifticonSchema = new mongoose.Schema({
         type : Boolean,
         required :true,
         default : true,
+    },
+    is_used : {
+        type : Boolean,
+        default : false
     }
 })
 

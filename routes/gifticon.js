@@ -105,6 +105,7 @@ router.get('/detail', async (req, res) => {
         console.error(error)
     }
 })
+
 router.get('/list', async (req, res) => {
     [today, startDate, endDate] = updateDates();
     const page = parseInt(req.query.page) || 1;
@@ -130,6 +131,35 @@ router.get('/list', async (req, res) => {
         return res.status(500).json({ message: 'error', loading: hasMore })
     }
 });
+
+router.get('/donated', async (req, res) => {
+    [today, startDate, endDate] = updateDates();
+    const page = parseInt(req.query.page) || 1;
+    const email = req.query.email;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    try {
+        const gifticons = await Gifticon.find({
+            // is_valid: true,
+            // todate: {
+            //     $gte: today,
+            // },
+            receiver_email : email,
+        })
+        .sort({ _id: -1 }) // -1은 내림차순 정렬
+        .skip(skip)
+        .limit(limit);
+        const hasMore = gifticons.length === limit;
+        if (gifticons.length === 0) {
+            return res.status(201).json({ gifticons: [], message: '기프티콘 더 없음', loading: hasMore });
+        }
+        return res.status(200).json({ gifticons: gifticons, loading: hasMore });
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ message: 'error', loading: hasMore })
+    }
+});
+
 router.get('/search', async (req, res) => {
     const keyword = req.query.keyword;
     const page = req.query.page;
@@ -149,6 +179,7 @@ router.get('/search', async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 })
+
 router.post('/buy', async (req, res) => {
     const email = req.body.email;
     const gifticonId = req.body.gifticonId;
@@ -187,6 +218,7 @@ router.post('/buy', async (req, res) => {
     } else {
         try {
             gifticon.is_valid = false;
+            gifticon.receiver_email = user.user_email;
             await gifticon.save();
             const point = new Point({
                 email: user.user_email,
@@ -195,8 +227,6 @@ router.post('/buy', async (req, res) => {
                 createdAt: today,
             })
             await point.save();
-            gifticon.donor_email = user.user_email;
-            await gifticon.save();
             return res.status(200).json({message : '구매 완료', buy : true})
         } catch (error) {
             console.error(error)
@@ -263,6 +293,27 @@ router.post('/received', async (req,res) =>{
         res.status(200).json({'count' : result.length})
     }catch(error){
         res.status(500).json()
+    }
+})
+
+router.get('/barcode', async(req,res)=>{
+    const id = req.query.id
+    try{
+        const result = await Gifticon.findOne({'_id' : id})
+        res.status(200).json({'url' : result.url})
+    }catch(error){
+        res.status(500).json()
+    }
+})
+
+router.get('/use', async(req,res) =>{
+    const id = req.query.id
+    try{
+        const updateResult = await Gifticon.updateOne({ _id: id }, { $set: { is_used: true } });
+        return res.status(200).json({})
+    }catch(error){
+        console.error(error)
+        return res.status(500).json({})
     }
 })
 

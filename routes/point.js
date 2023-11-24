@@ -39,7 +39,6 @@ router.get('/list', async (req,res)=>{
             .skip(skip)
             .limit(limit);
         const hasMore = points.length === limit;
-        console.log(points)
         if (points.length === 0) {//
             return res.status(201).json({ points: [], hasMore: hasMore });
         }
