@@ -59,7 +59,8 @@ router.post('/posts', verifyAccessToken, upload.array('image'), async (req, res)
 
 router.get('/posts', async (req, res) => {
     try {
-        const posts = await Feed.find({});
+        const posts = await Feed.find({})
+        .sort({ _id: -1 });
         res.status(200).json(posts);
     } catch (error) {
         console.error("Error in GET /posts:", error);
