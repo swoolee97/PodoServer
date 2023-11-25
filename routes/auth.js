@@ -80,6 +80,7 @@ router.post('/login', async (req, res) => {
             message: "로그인 성공",
             login: true,
             user_email: user.user_email,
+            nick_name : user.nick_name,
             accessToken
         })
     } else {

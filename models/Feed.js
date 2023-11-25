@@ -5,6 +5,10 @@ const FeedSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    nickName :{
+        type : String,
+        required: true,
+    },
     text: {
         type: String,
         default: null,

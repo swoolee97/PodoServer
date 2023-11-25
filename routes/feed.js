@@ -30,13 +30,13 @@ router.post('/posts', verifyAccessToken, upload.array('image'), async (req, res)
 
         const email = req.headers['user_email'];
         const text = req.body.text;
-        
+        const nick_name = req.body.nick_name;
         // 이미지 처리
         const images = req.files;
         const imageUrls = images.map(file => file.location);
 
         // 새로운 피드 객체 생성
-        const newPost = new Feed({ email, text, imageUrl: imageUrls });
+        const newPost = new Feed({ email, text, imageUrl: imageUrls, nickName : nick_name });
     
         // 데이터베이스에 저장
         await newPost.save();
